@@ -5,6 +5,6 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 public interface UserService {
-    String sendUser(String username);
+    String createUser(String username);
     Stream<UserEntity> queryUser();
 }
