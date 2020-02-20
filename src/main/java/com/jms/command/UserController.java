@@ -20,13 +20,13 @@ public class UserController {
 
     @GetMapping(path = "/create")
     public String createUser(@RequestParam( required=false ) String username){
-        return createUser(username);
+        return createUserInternal(username);
     }
 
     @Transactional
     @GetMapping(path = "/transactional/create")
     public String createUserTransactional(@RequestParam( required=false ) String username){
-        return createUser(username);
+        return createUserInternal(username);
     }
 
     private String createUserInternal(String username) {
