@@ -2,6 +2,7 @@ package com.jms.command;
 
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,31 +11,26 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("users")
+@RequiredArgsConstructor
 public class UserController {
-    private UserService userService;
 
-    @Autowired
-    public UserController(UserService userService){
-        this.userService = userService;
-    }
+    private final UserService userService;
 
     @GetMapping(path = "/create")
     public String createUser(@RequestParam( required=false ) String username){
-        return createUserInternal(username);
+        return userService.createUser(username);
     }
 
     @Transactional
     @GetMapping(path = "/transactional/create")
     public String createUserTransactional(@RequestParam( required=false ) String username){
-        return createUserInternal(username);
+        return userService.createUser(username);
     }
 
-    private String createUserInternal(String username) {
-        try {
-            return userService.sendUser(username);
-        } catch (RuntimeException ex) {
-            return ex.getMessage();
-        }
+    @Transactional
+    @GetMapping(path = "/transactional/with_clone/create")
+    public String createUserWithCloneTransactional(@RequestParam( required=false ) String username){
+        return userService.createUser(username + "_clone") + " : " + userService.createUser(username);
     }
 
     @GetMapping(path = "/all")
