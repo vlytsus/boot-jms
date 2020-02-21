@@ -28,7 +28,6 @@ public class UserServiceImpl implements UserService {
     log.debug("saveUser: ", username);
     jmsTemplate.convertAndSend(MESSAGE_QUEUE,  "JMS received User : " + username );
     UserEntity userEntity = new UserEntity();
-    userEntity.setUserId(UUID.randomUUID());
     userEntity.setUsername(username);
     return userRepository.save(userEntity).getUserId().toString();
   }
