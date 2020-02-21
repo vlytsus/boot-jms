@@ -95,3 +95,5 @@ And JMS consumed messages in logs:
  # Conclusion
 Spring allows to use @Transactional annotations to handle local transactions on JDBC level. Hovewer if you want to have global distributed transactions with several resources like databases & JMS consumers you have to configure JPA Transaction Management Provider. However as you might be noticed distributed transactions are much more slower because of synchronizations.
 
+![local-vs-distributed](https://github.com/vlytsus/boot-jms/blob/master/docs/local-vs-distributed.png)
+
