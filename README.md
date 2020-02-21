@@ -6,15 +6,15 @@ You can test how @Transactional annotation influences to data commit & rollback
 In UserServiceImpl#createUser message is sent to JMS and user is stored in database.
 
 ## Testing
-There are several test endpoints exposed to test transactions from different perspectives. By default project should be configured to not use JPA Transaction Management (spring-boot-starter-jta-atomikos dependency is not active).
+There are several endpoints exposed to test transactions from different perspectives. By default project should be configured to not use JTA transaction management (spring-boot-starter-jta-atomikos dependency is not active).
 In that case Spring Framework uses it's own local declarative transactions.
-Lets call following endpoints in browser:
+Lets call following endpoints in browser to create users user01, user02 and user03:
 * http://localhost:8081/users/create?username=user01
 * http://localhost:8081/users/transactional/create?username=user02
 * http://localhost:8081/users/transactional/with_clone/create?username=user03
 * http://localhost:8081/users/all
 
-Lat query will print all users inserted to the database:
+Last query "users/all" will print all users inserted to the database:
 ```
 user01 : user02 : user03_clone : user03
 ```
@@ -31,14 +31,14 @@ In logs you will also see that JMS consumer has received some messages:
 ##################################
 ```
 As you see operation "transactional/with_clone/create" inserts 2 records. It will be used later to demonstrate data rollback.
-Now let's modify our queries to avoid sending username (which is required)
+Now let's modify our queries to not provide any usernames for new users. Which should lead database insertion errors because field username must not be null.
 
 * http://localhost:8081/users/transactional/create
 * http://localhost:8081/users/transactional/with_clone/create
 * http://localhost:8081/users/all
 
-All create operations are failed and no data inserted into database. Even method "transactional/with_clone/create" not inserted "_clone" user because another query failed and made rollback.
-However, messages were processed by JMS. Because Spring local transactions have no influence on JMS consumer.
+All create operations are failed and no data inserted into database. Even method "transactional/with_clone/create" has not stored user record with username "_clone". Becasue second insert with null username causes exception and rollback of whole transaction together with inserted "_clone" user.
+However, despite database state was rolled back, messages were processed by JMS. Because Spring local transactions have no influence on JMS consumer.
 
 ```
  ##################################
@@ -51,7 +51,7 @@ However, messages were processed by JMS. Because Spring local transactions have 
 ```
 If you want to mix Database and JMS transactions together and make trully atomic operations you should handle transactions by some distributed JTA transactions manager.
 In this project is used popular embeddable cloud-native transaction manager - Atomikos.
-To activate you should uncomment Atomikos dependency in pom.xml 
+To activate it you should uncomment Atomikos dependency in pom.xml 
 ```
 <dependency>
 	<groupId>org.springframework.boot</groupId>
@@ -59,7 +59,7 @@ To activate you should uncomment Atomikos dependency in pom.xml
 </dependency>
 ```
 Please rebuild and restart application after that.
-If you repeat last test without usernames you will notice that JMS messages are not processed because rollback was propagated to JMS by JTA Manager.
+If you repeat last test (without usernames) you will notice that JMS messages are not processed. There will be no corresponding logs like "received payload: <JMS received User : null>" because rollback was propagated to JMS by JTA Manager too.
 
 * http://localhost:8081/users/transactional/create
 * http://localhost:8081/users/transactional/with_clone/create
@@ -74,7 +74,7 @@ Try again with normal usernames and you'll see that everything works fine as dur
 ```
 user05 : user06_clone : user06
 ```
-And in logs:
+And JMS consumed messages in logs:
 ```
  ##################################
 : received payload: <JMS received User : user05>
@@ -86,5 +86,5 @@ And in logs:
  ```
  
  # Conclusion
-Spring allows to use @Transactional annotations to handle database transactions on JDBC level. Hovewer if you want to use global distributed transactions with several resources like database & jms you have to configure JPA Transaction Management Provider
+Spring allows to use @Transactional annotations to handle local transactions on JDBC level. Hovewer if you want to have global distributed transactions with several resources like databases & JMS consumers you have to configure JPA Transaction Management Provider. However as you might be noticed distributed transactions are much more slower because of synchronizations.
 
