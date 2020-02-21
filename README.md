@@ -1,5 +1,7 @@
-# boot-jms
+# Java Spring Boot project with embedded ActiveMQ JMS provider & distributed JTA transactions manager
 Spring Boot with embedded JMS provider & JTA transactions
+
+[Also see detailed description article on Medium.com ...](https://medium.com/@victorlytsus/java-spring-boot-project-with-embedded-activemq-jms-provider-distributed-jta-transactions-f490f914fae2)
 
 ![JMS](https://github.com/vlytsus/boot-jms/blob/master/docs/jms.png)
 
