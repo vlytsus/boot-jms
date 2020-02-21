@@ -1,6 +1,8 @@
 # boot-jms
 Spring Boot with embedded JMS provider & JTA transactions
 
+![JMS](https://github.com/vlytsus/boot-jms/blob/master/docs/jms.png)
+
 This project contains example of JMS producer-consumer integration with database and transactions.
 You can test how @Transactional annotation influences to data commit & rollback
 In UserServiceImpl#createUser message is sent to JMS and user is stored in database.
@@ -49,7 +51,12 @@ However, despite database state was rolled back, messages were processed by JMS.
  : received payload: <JMS received User : null>
  ##################################
 ```
+![local transaction](https://github.com/vlytsus/boot-jms/blob/master/docs/local-transaction.png)
+
 If you want to mix Database and JMS transactions together and make trully atomic operations you should handle transactions by some distributed JTA transactions manager.
+
+![distributed transaction](https://github.com/vlytsus/boot-jms/blob/master/docs/distributed%20transaction.png)
+
 In this project is used popular embeddable cloud-native transaction manager - Atomikos.
 To activate it you should uncomment Atomikos dependency in pom.xml 
 ```
@@ -87,4 +94,6 @@ And JMS consumed messages in logs:
  
  # Conclusion
 Spring allows to use @Transactional annotations to handle local transactions on JDBC level. Hovewer if you want to have global distributed transactions with several resources like databases & JMS consumers you have to configure JPA Transaction Management Provider. However as you might be noticed distributed transactions are much more slower because of synchronizations.
+
+![local-vs-distributed](https://github.com/vlytsus/boot-jms/blob/master/docs/local-vs-distributed.png)
 
