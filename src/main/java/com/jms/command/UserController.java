@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.sleuth.SpanName;
 import org.springframework.cloud.sleuth.annotation.NewSpan;
 import org.springframework.cloud.sleuth.annotation.SpanTag;
 import org.springframework.http.MediaType;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@SpanName("UserController")
 @RestController
 @RequestMapping("users")
 @RequiredArgsConstructor
@@ -38,7 +40,10 @@ public class UserController {
     @Transactional
     @GetMapping(path = "/transactional/with_clone/create")
     public String createUserWithCloneTransactional(@SpanTag("username") @RequestParam( required=false ) String username){
-        return userService.createUser(username + "_clone") + " : " + userService.createUser(username);
+        String service1Result = userService.createUser(username + "_clone_1");
+        String service2Result = userService.createUser(username + "_clone_2");
+        String service3Result = userService.createUser(username);
+        return service1Result + " : " + service2Result + " : " + service3Result;
     }
 
     @NewSpan
